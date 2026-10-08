@@ -119,3 +119,12 @@ def pipeline() -> str:
              ("3. RAG", "أقرب أنماط نصب معروفة"), ("4. LLM + Chain", "تحليل وتفسير"),
              ("5. Output Parser", "JSON ثابت: حكم + أسباب + إجراء")]
     return '<div class="flow">' + "".join(f'<div class="f"><b>{a}</b><span class="muted">{b}</span></div>' for a, b in items) + "</div>"
+
+def answer_card(verdict: str, headline: str, reasons: list, actions: list) -> str:
+    """إجابة واحدة واضحة: العنوان + ليه + اعمل إيه"""
+    color, vcls, ccls, icon = COLORS[verdict]
+    r = "".join(f"<li>{esc(x)}</li>" for x in reasons)
+    a = "".join(f'<div class="step"><div class="n">{i}</div><div>{esc(x)}</div></div>' for i, x in enumerate(actions, 1))
+    return (f'<div class="verdict-box {vcls}"><p class="v-title" style="font-size:26px">{icon} {esc(headline)}</p>'
+            f'<div style="margin-top:12px"><b>ليه؟</b><ul class="clean" style="margin-top:6px">{r}</ul></div>'
+            f'<div style="margin-top:14px"><b>اعمل إيه دلوقتي؟</b>{a}</div></div>')
