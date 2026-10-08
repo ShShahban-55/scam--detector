@@ -15,12 +15,17 @@ GROQ_MODEL = secret("GROQ_MODEL", "llama-3.3-70b-versatile")
 MODE = "cloud" if GROQ_KEY else "local"      # بدون مفتاح = بيشتغل بالموديل المحلي (Kaggle)
 
 # ---------------------- تحميل المكونات (مرة واحدة) ----------------------
+# بيجرّب الموديلات بالترتيب لحد ما واحد يشتغل مع حسابك
+CANDIDATES = [GROQ_MODEL, "openai/gpt-oss-120b", "llama-3.1-8b-instant", "openai/gpt-oss-20b", "llama-3.3-70b-versatile"]
+
 @st.cache_resource
 def load_cloud():
     from langchain_groq import ChatGroq
     from rag_light import get_light_retriever
-    llm = ChatGroq(api_key=GROQ_KEY, model=GROQ_MODEL, temperature=0,
-                   model_kwargs={"response_format": {"type": "json_object"}})
+    models = list(dict.fromkeys(m for m in CANDIDATES if m))
+    llms = [ChatGroq(api_key=GROQ_KEY, model=m, temperature=0,
+                     model_kwargs={"response_format": {"type": "json_object"}}) for m in models]
+    llm = llms[0].with_fallbacks(llms[1:])
     return llm, get_light_retriever()
 
 @st.cache_resource
