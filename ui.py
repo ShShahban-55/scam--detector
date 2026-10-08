@@ -1,10 +1,11 @@
-"""مكونات الواجهة: CSS + قطع HTML (كلها بتعمل escape للنصوص عشان الأمان)"""
+ """مكونات الواجهة: CSS + قطع HTML (كلها بتعمل escape للنصوص عشان الأمان)"""
 from html import escape as esc
 
 CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap');
 html, body, .stApp, .stApp * {font-family: 'Cairo', sans-serif;}
+[data-testid="stIconMaterial"], .material-symbols-rounded {font-family: "Material Symbols Rounded" !important;}
 .stApp {background: radial-gradient(900px 500px at 90% -5%, rgba(99,102,241,.35), transparent 60%),
         radial-gradient(800px 500px at 0% 0%, rgba(20,184,166,.30), transparent 60%), #0a0f1f; color: #e8ecf8;}
 .stApp p, .stApp li, .stApp label, .stApp span, .stApp h1, .stApp h2, .stApp h3, .stApp div[data-testid="stMarkdownContainer"] {color: #e8ecf8;}
