@@ -4,4 +4,5 @@ langchain-core
 langchain-community
 langchain-groq
 scikit-learn
+requests
 pydantic
