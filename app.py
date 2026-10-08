@@ -122,33 +122,23 @@ def load_example(text):
     st.session_state["auto_run"] = True
 
 # ---------------------- عرض النتيجة ----------------------
+HEADLINES = {"نصب": "دي رسالة نصب. متتعاملش معاها", "مشبوه": "الرسالة دي مشبوهة. اتأكد قبل أي خطوة",
+             "سليم": "الرسالة دي تبدو سليمة"}
+
 def render_result(r: dict):
     color = ui.COLORS[r["verdict"]][0]
-    summary = {"نصب": "الرسالة دي فيها علامات نصب واضحة. متتعاملش معاها.",
-               "مشبوه": "فيه علامات تثير الشك. اتأكد من الجهة بنفسك قبل أي تصرف.",
-               "سليم": "مفيش علامات نصب واضحة، بس خليك حذر دايماً."}[r["verdict"]]
-    sources = ["قواعد الأمان", "فحص الروابط"] + (["ذكاء اصطناعي + RAG"] if r["res"] else ["قواعد فقط"])
-    c1, c2 = st.columns([1, 1.25])
+    reasons = list(r["reasons"])
+    risky = [u for u in r["urls"] if u["risk"] >= 25]
+    if risky and not any("رابط" in x or "دومين" in x for x in reasons):
+        reasons.insert(0, "الرابط: " + max(risky[0]["findings"], key=lambda f: f[1])[0])
+    c1, c2 = st.columns([1, 1.5])
     c1.markdown(f'<div class="card">{ui.gauge(r["score"], color)}</div>', unsafe_allow_html=True)
-    c2.markdown(ui.verdict_box(r["verdict"], summary, sources), unsafe_allow_html=True)
-
+    c2.markdown(ui.answer_card(r["verdict"], HEADLINES[r["verdict"]], reasons[:3], r["actions"][:3]), unsafe_allow_html=True)
+    if r["report"].strip() and r["verdict"] != "سليم":
+        with st.expander("📝 نص بلاغ جاهز"):
+            st.code(r["report"], language=None)
     if r["llm_error"]:
-        st.warning("الذكاء الاصطناعي مش متاح دلوقتي، فالنتيجة من قواعد الأمان وفحص الروابط بس.")
-    if r["escalated"]:
-        st.info("قواعد الأمان رفعت التصنيف لأن فيه علامات قوية الذكاء الاصطناعي ماعتبرهاش.")
-
-    if r["sig"]["matched"] or r["sig"]["positives"]:
-        st.markdown(ui.card("🧩 العلامات اللي اتكشفت", ui.chips(r["sig"]["matched"]) + ui.chips(r["sig"]["positives"])),
-                    unsafe_allow_html=True)
-    st.markdown(ui.card("🧐 ليه الحكم ده؟", ui.ul(r["reasons"])), unsafe_allow_html=True)
-    if r["urls"]:
-        st.markdown("#### 🔗 فحص الروابط")
-        for u in r["urls"]:
-            st.markdown(ui.link_card(u), unsafe_allow_html=True)
-    st.markdown(ui.card("✅ اعمل إيه دلوقتي", ui.steps(r["actions"])), unsafe_allow_html=True)
-    if r["report"].strip():
-        st.markdown("##### 📝 نص بلاغ جاهز (اضغط أيقونة النسخ)")
-        st.code(r["report"], language=None)
+        st.caption("تم الفحص بقواعد الأمان وفحص الروابط فقط (الذكاء الاصطناعي مش متاح دلوقتي).")
     st.caption("⚠️ مساعد توعية مش حكم نهائي. لو في شك، كلم البنك أو الجهة على رقمها الرسمي.")
 
 def log(message, r):
@@ -194,10 +184,16 @@ with tab2:
         else:
             with st.spinner("بفحص الرابط..."):
                 info = analyze_url(link, expand)
-            ui_color = {"خطير": "نصب", "مشبوه": "مشبوه", "عادي": "سليم"}[info["level"]]
-            st.markdown(f'<div class="card">{ui.gauge(info["risk"], ui.COLORS[ui_color][0])}</div>', unsafe_allow_html=True)
-            st.markdown(ui.link_card(info), unsafe_allow_html=True)
-            st.caption("غياب علامات الخطر مش معناه إن الرابط آمن 100%. لو في شك متفتحوش.")
+            v = {"خطير": "نصب", "مشبوه": "مشبوه", "عادي": "سليم"}[info["level"]]
+            head = {"نصب": "الرابط ده خطير. متفتحوش", "مشبوه": "الرابط ده مشبوه. متفتحوش قبل ما تتأكد",
+                    "سليم": "مفيش علامات خطر ظاهرة في الرابط"}[v]
+            why = [t for t, _ in info["findings"]][:4] or ["الدومين والتحويلات مفيهمش علامات مريبة"]
+            todo = ["متضغطش عليه ومتدخلش أي بيانات"] if v != "سليم" else ["لو مش متأكد، ادخل على الموقع الرسمي بنفسك"]
+            todo.append("لو وصلك من رسالة، بلّغ عنها وامسحها")
+            c1, c2 = st.columns([1, 1.5])
+            c1.markdown(f'<div class="card">{ui.gauge(info["risk"], ui.COLORS[v][0])}</div>', unsafe_allow_html=True)
+            c2.markdown(ui.answer_card(v, head, why, todo), unsafe_allow_html=True)
+            st.caption("غياب علامات الخطر مش معناه إن الرابط آمن 100%.")
 
 with tab3:
     if not st.session_state["history"]:
