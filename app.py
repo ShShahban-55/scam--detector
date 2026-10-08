@@ -1,4 +1,4 @@
-import os
+ import os
 from contextlib import nullcontext
 from datetime import datetime, timedelta, timezone
 
@@ -149,10 +149,6 @@ def render_result(r: dict):
     if r["report"].strip():
         st.markdown("##### 📝 نص بلاغ جاهز (اضغط أيقونة النسخ)")
         st.code(r["report"], language=None)
-    if r["docs"]:
-        with st.expander("📚 الأنماط اللي اعتمد عليها الـ RAG"):
-            for d in r["docs"]:
-                st.write(d.page_content)
     st.caption("⚠️ مساعد توعية مش حكم نهائي. لو في شك، كلم البنك أو الجهة على رقمها الرسمي.")
 
 def log(message, r):
@@ -164,21 +160,8 @@ def log(message, r):
 st.markdown(ui.CSS, unsafe_allow_html=True)
 st.markdown(ui.hero(), unsafe_allow_html=True)
 
-use_ft = False
-with st.sidebar:
-    st.markdown("### ⚙️ الإعدادات")
-    expand = st.toggle("🌐 فك الروابط المختصرة (اتصال حقيقي)", value=True,
-                       help="بيتتبع التحويلات عشان يعرف الرابط بيودّيك فين فعلاً، من غير ما يفتح الصفحة.")
-    if MODE == "local":
-        use_ft = st.toggle("🎯 الموديل المتدرب (Fine-tuned)", value=True)
-    else:
-        st.caption("النسخة السحابية: قواعد أمان + RAG + LangChain + Output Parser. الموديل المتدرب QLoRA بيشتغل في نسخة Kaggle.")
-    h = st.session_state["history"]
-    st.markdown("### 📊 إحصائيات الجلسة")
-    a, b = st.columns(2)
-    a.metric("تم فحصه", len(h))
-    b.metric("نصب", sum(1 for x in h if x["الحكم"] == "نصب"))
-    st.caption("الرسائل مش بتتخزن عندنا، والسجل بيتمسح لما تقفل الصفحة.")
+expand = True              # فك الروابط المختصرة شغال دايماً
+use_ft = (MODE == "local")  # على Kaggle بنستخدم الموديل المتدرب
 
 tab1, tab2, tab3, tab4 = st.tabs(["🔍 فحص رسالة", "🔗 فحص رابط", "🕘 السجل", "ℹ️ عن المشروع"])
 
