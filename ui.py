@@ -1,4 +1,4 @@
- """مكونات الواجهة: CSS + قطع HTML (كلها بتعمل escape للنصوص عشان الأمان)"""
+"""مكونات الواجهة: CSS + قطع HTML (كلها بتعمل escape للنصوص عشان الأمان)"""
 from html import escape as esc
 
 CSS = """
