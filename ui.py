@@ -10,7 +10,7 @@ html, body, .stApp, .stApp * {font-family: 'Cairo', sans-serif;}
         radial-gradient(800px 500px at 0% 0%, rgba(20,184,166,.30), transparent 60%), #0a0f1f; color: #e8ecf8;}
 .stApp p, .stApp li, .stApp label, .stApp span, .stApp h1, .stApp h2, .stApp h3, .stApp div[data-testid="stMarkdownContainer"] {color: #e8ecf8;}
 [data-testid="stHeader"] {background: transparent;}
-#MainMenu, footer {visibility: hidden;}
+MainMenu, footer {visibility: hidden;}
 .block-container {max-width: 980px; padding-top: 1.2rem; direction: rtl; text-align: right;}
 [data-testid="stSidebar"] {background: #0d1430; direction: rtl;}
 .hero {padding: 26px 28px; border-radius: 22px; margin-bottom: 18px; position: relative; overflow: hidden;
